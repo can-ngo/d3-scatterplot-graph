@@ -18,8 +18,9 @@ fetch(url)
             date.setSeconds(seconds);
             return date;
         }
-        const times = data.map(item => timeToDate(item.Time));
-             
+
+        const times = data.map(item => item.Time);
+        
         const width = 800;
         const height = 500;
 
@@ -27,9 +28,7 @@ fetch(url)
               yearMax.setMonth(yearMax.getMonth()+12)//For display purpose
         const yearMin = d3.min(yearsDate);
               yearMin.setMonth(yearMin.getMonth()-12)//For display purpose
-        const timeMax = d3.max(times);
-        const timeMin = d3.min(times);
-
+              
         //Create SVG container
         const svg = d3.select('.container')
                       .append('svg')
@@ -38,23 +37,35 @@ fetch(url)
 
         //Add legend to y-axis only
         svg.append('text')
-           .attr('x', -120)
-           .attr('y', 20)
+           .attr('x', -140)
+           .attr('y', 60)
            .attr('transform','rotate(-90)')
            .text('Time in Minutes')
         
-        //Scaling settings
+        //Scaling x settings
         const xScale = d3.scaleTime()
                          .domain([yearMin,yearMax])
                          .range([0,width]);
 
         const xAxis = d3.axisBottom().scale(xScale);
+
         //Add x-axis
         svg.append('g')
            .call(xAxis)
            .attr('id','x-axis')
-           .attr('transform','translate(25,520)')
-
+           .attr('transform','translate(40,520)')
+        
+        //Scaling y settings
+        const yScale = d3.scaleTime()
+                         .domain(d3.extent(times))
+                         .range([0,height]);
+        const timeFormat = d3.timeFormat('%M:%S');
+        const yAxis = d3.axisLeft(yScale).tickFormat(timeFormat);
+        //Add y-axis
+        svg.append('g')
+           .call(yAxis)
+           .attr('id','y-axis')
+           .attr('transform','translate(40,20)')
 
     })
     .catch(e => console.log(e))
