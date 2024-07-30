@@ -17,3 +17,13 @@ body {
 svg {
     border: 1px solid blue;
 }
+
+.tooltip {
+    position: absolute;
+    font-size: 0.6rem;
+    background-color: lightsteelblue;
+    padding: 5px;
+    border-radius: 5px;
+    text-align: left;
+    width: 150px;
+}

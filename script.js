@@ -1,41 +1,55 @@
 
 const url = 'https://raw.githubusercontent.com/freeCodeCamp/ProjectReferenceData/master/cyclist-data.json';
 
+//Dimension of SVG contains Graph in px
+const width = 800;
+const height = 500;
+
+//Create SVG container
+const svg = d3.select('.container')
+              .append('svg')
+              .attr('width', width + 60)
+              .attr('height', height + 60);
+
+//Function that convert the year number format to Date objects
+const yearToDate = year => new Date(year,0,1);
+
+//Function that convert the time from string 'mm:ss' to Date object
+const timeToDate = timeString => {
+   const [minutes, seconds] = timeString.split(':').map(Number);
+   const date = new Date(1970, 0, 1); //Stardard Date ECMAScript 2017
+   date.setMinutes(minutes);
+   date.setSeconds(seconds);
+   return date;
+}
+
+//Get data, modify format, draw graph,...
 fetch(url)
     .then(res => res.json())
     .then(data => {
-
-        //Convert the year format to Date objects
-        const yearToDate = year => new Date(year,0,1);
-
+ 
         const yearsDate = data.map(item => yearToDate(item.Year)).sort((a,b)=>a-b);
-        
-        //Convert the time from string 'mm:ss' to Date object
-        const timeToDate = timeString => {
-            const [minutes, seconds] = timeString.split(':').map(Number);
-            const date = new Date(1970, 0, 1); //Stardard Date ECMAScript 2017
-            date.setMinutes(minutes);
-            date.setSeconds(seconds);
-            return date;
-        }
-        
         const times = data.map(item => timeToDate(item.Time));
         const color = d3.scaleOrdinal(d3.schemeObservable10);
-        const width = 800;
-        const height = 500;
+        const tooltip = d3.select('body')
+                          .append('div')
+                          .attr('class','tooltip')
+                          .attr('id','tooltip')
+                          .style('opacity',0);
 
         const yearMax = d3.max(yearsDate);
               yearMax.setMonth(yearMax.getMonth()+12)//For display purpose
         const yearMin = d3.min(yearsDate);
               yearMin.setMonth(yearMin.getMonth()-12)//For display purpose
               
-        //Create SVG container
-        const svg = d3.select('.container')
-                      .append('svg')
-                      .attr('width', width + 60)
-                      .attr('height', height + 60);
-
-        //Add legend to y-axis only
+        //Add legent to x-axis
+        svg.append('text')
+           .attr('x', width + 30)
+           .attr('y', height + 10)
+           .text('Year')
+           .style('text-anchor','end')
+        
+        //Add legend to y-axis
         svg.append('text')
            .attr('x', -140)
            .attr('y', 60)
@@ -68,6 +82,7 @@ fetch(url)
            .attr('id','y-axis')
            .attr('transform','translate(40,20)')
 
+        //Add dot based on data received
         svg.selectAll('.dot')
            .data(data)
            .enter()
@@ -78,7 +93,21 @@ fetch(url)
            .attr('cy', d => yScale(timeToDate(d.Time)))
            .attr('transform','translate(40,20)')
            .style('fill', d => color(d.Doping !== ""))
-           
+           .on('mouseover', (event, d)=>{
+               tooltip.style('opacity',0.9);
+               tooltip.attr('data-year', d.Year);
+               tooltip.html(
+                  d.Name + ': ' + d.Nationality + '<br/>' +
+                  'Year: ' + d.Year + 
+                  ', Time: ' + timeFormat(timeToDate(d.Time)) +
+                  (d.Doping? '<br/><br/>' + d.Doping : '')
+               )
+               tooltip.style('left', event.pageX + 10 + 'px')
+               tooltip.style('top', event.pageY - 30 + 'px')
+           })
+           .on('mouseout', ()=>{
+               tooltip.style('opacity', 0);
+           })
 
     })
     .catch(e => console.log(e))
