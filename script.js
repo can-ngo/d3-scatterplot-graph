@@ -18,9 +18,9 @@ fetch(url)
             date.setSeconds(seconds);
             return date;
         }
-
-        const times = data.map(item => item.Time);
         
+        const times = data.map(item => timeToDate(item.Time));
+        const color = d3.scaleOrdinal(d3.schemeObservable10);
         const width = 800;
         const height = 500;
 
@@ -47,7 +47,7 @@ fetch(url)
                          .domain([yearMin,yearMax])
                          .range([0,width]);
 
-        const xAxis = d3.axisBottom().scale(xScale);
+        const xAxis = d3.axisBottom(xScale);
 
         //Add x-axis
         svg.append('g')
@@ -61,11 +61,24 @@ fetch(url)
                          .range([0,height]);
         const timeFormat = d3.timeFormat('%M:%S');
         const yAxis = d3.axisLeft(yScale).tickFormat(timeFormat);
+        
         //Add y-axis
         svg.append('g')
            .call(yAxis)
            .attr('id','y-axis')
            .attr('transform','translate(40,20)')
+
+        svg.selectAll('.dot')
+           .data(data)
+           .enter()
+           .append('circle')
+           .attr('class','dot')
+           .attr('r', 6)
+           .attr('cx', d => xScale(yearToDate(d.Year)))
+           .attr('cy', d => yScale(timeToDate(d.Time)))
+           .attr('transform','translate(40,20)')
+           .style('fill', d => color(d.Doping !== ""))
+           
 
     })
     .catch(e => console.log(e))
