@@ -109,5 +109,44 @@ fetch(url)
                tooltip.style('opacity', 0);
            })
 
+         //Add subtitle
+         svg.append('text')
+            .attr('x', width/2 - 90)
+            .attr('y', 20)
+            .style('font-size','1rem')
+            .text("35 Fastest times up Alpe d'Huez");
+         
+         const legendContainer = svg.append('g').attr('id','legend');
+
+         const legend = legendContainer.selectAll('#legend')
+                                       .data(color.domain())
+                                       .enter()
+                                       .append('g')
+                                       .attr('class','legend-label')
+                                       .attr('transform', (d,i) => {
+                                          return 'translate(0,' + (height/2-i*20)+')';
+                                       });
+         
+         legend.append('rect')
+               .attr('x', width + 20)
+               .attr('width', 18)
+               .attr('height', 18)
+               .style('fill',color);
+         
+         legend.append('text')
+               .attr('x', width + 10)
+               .attr('y', 10)
+               .attr('dy', '0.35em')
+               .style('text-anchor','end')
+               .style('font-size','0.6rem')
+               .text( d => {
+                  if (d) {
+                     return 'Riders with doping allegations';
+                  } else {
+                     return 'No doping allegations';
+                  }
+               })
+         
+
     })
     .catch(e => console.log(e))
